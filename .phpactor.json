@@ -1,0 +1,16 @@
+{
+    "$schema": "/phpactor.schema.json",
+    "symfony.enabled": true,
+    "phpstan": {
+        "enabled": true,
+        "level": 7,
+        "paths": ["src"]
+    },
+    "phpcs.enabled": false,
+    "indexer.exclude_patterns": [
+        "/vendor/**/Tests/**/*",
+        "/vendor/**/tests/**/*",
+        "/var/cache/**/*",
+        "/vendor/composer/**/*"
+    ]
+}
