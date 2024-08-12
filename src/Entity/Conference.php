@@ -35,6 +35,11 @@ class Conference
         $this->comments = new ArrayCollection();
     }
 
+    public function __toString(): string
+    {
+        return $this->city . ' ' . $this->year;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -64,12 +69,12 @@ class Conference
         return $this;
     }
 
-    public function isInternational(): ?bool
+    public function getIsInternational(): ?bool
     {
         return $this->isInternational;
     }
 
-    public function setInternational(bool $isInternational): static
+    public function setIsInternational(bool $isInternational): static
     {
         $this->isInternational = $isInternational;
 
