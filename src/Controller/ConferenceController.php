@@ -23,9 +23,7 @@ class ConferenceController extends AbstractController
     #[Route('/', name: 'homepage')]
     public function index(ConferenceRepository $conferenceRepository): Response
     {
-        return $this->render('conference/index.html.twig', [
-            'conferences' => $conferenceRepository->findAll(),
-        ]);
+        return $this->render('conference/index.html.twig');
     }
 
     /**
@@ -37,11 +35,12 @@ class ConferenceController extends AbstractController
      *
      * @return Response The HTTP response containing the rendered template
      */
-    #[Route('/conference/{id}', name: 'conference')]
+    #[Route('/conference/{slug}', name: 'conference')]
     public function show(
         Request $request,
         Conference $conference,
-        CommentRepository $commentRepository
+        CommentRepository $commentRepository,
+        ConferenceRepository $conferenceRepository
     ): Response {
         $offset = max(0, $request->query->getInt('offset', 0));
         $paginator = $commentRepository->getCommentPaginator($conference, $offset);
