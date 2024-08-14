@@ -6,9 +6,9 @@ use App\Entity\Conference;
 use App\Repository\CommentRepository;
 use App\Repository\ConferenceRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Twig\Environment;
 
 class ConferenceController extends AbstractController
 {
@@ -16,42 +16,41 @@ class ConferenceController extends AbstractController
      * This is the index action method of a controller.
      * It renders the 'conference/index.html.twig' template and passes the list of all conferences to it.
      *
-     * @param Environment          $tiwg                 The Twig environment service for rendering templates
      * @param ConferenceRepository $conferenceRepository The repository for fetching conference data
      *
      * @return Response The rendered template as a Response object
      */
     #[Route('/', name: 'homepage')]
-    public function index(Environment $tiwg, ConferenceRepository $conferenceRepository): Response
+    public function index(ConferenceRepository $conferenceRepository): Response
     {
-        return new Response($tiwg->render('conference/index.html.twig', [
+        return $this->render('conference/index.html.twig', [
             'conferences' => $conferenceRepository->findAll(),
-        ]));
+        ]);
     }
 
     /**
-     * This is a controller action method that handles the display of a specific conference.
+     * This controller action is responsible for rendering the conference details page.
      *
-     * @param Environment       $twig              The Twig environment service for rendering templates
-     * @param Conference        $conference        The Conference entity object to be displayed
-     * @param CommentRepository $commentRepository The repository for fetching comments related to the conference
+     * @param Request $request The current HTTP request
+     * @param Conference $conference The conference entity to be displayed
+     * @param CommentRepository $commentRepository The repository for fetching comments
      *
-     * @return Response The rendered response containing the conference details and comments
+     * @return Response The HTTP response containing the rendered template
      */
     #[Route('/conference/{id}', name: 'conference')]
     public function show(
-        Environment $twig,
+        Request $request,
         Conference $conference,
         CommentRepository $commentRepository
     ): Response {
-        return new Response(
-            $twig->render('conference/show.html.twig', [
-                'conference' => $conference,
-                'comments' => $commentRepository->findBy(
-                    ['conference' => $conference],
-                    ['createdAt' => 'DESC'],
-                )
-            ])
-        );
+        $offset = max(0, $request->query->getInt('offset', 0));
+        $paginator = $commentRepository->getCommentPaginator($conference, $offset);
+
+        $this->render('conference/show.html.twig', [
+            'conference' => $conference,
+            'comments' => $paginator,
+            'previous' => $offset - CommentRepository::COMMENTS_PER_PAGE,
+            'next' => min(count($paginator), $offset + CommentRepository::COMMENTS_PER_PAGE),
+        ]);
     }
 }
